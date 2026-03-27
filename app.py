@@ -32,15 +32,12 @@ def init_db():
 
 init_db()
 
-# ✅ CREATE ADMIN (IMPORTANT)
+# ✅ CREATE ADMIN
 def create_admin():
     conn = get_db()
     cur = conn.cursor()
 
-    # delete old admin if exists
     cur.execute("DELETE FROM users WHERE role='admin'")
-
-    # insert new admin
     cur.execute("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)",
                 ("Admin","payalbhadange806@gmail.com","Payal@1234","admin"))
 
@@ -94,12 +91,18 @@ def login():
     else:
         return "Login Failed"
 
+# ✅ FIXED USER ROUTE
 @app.route("/user")
 def user():
+    if "name" not in session:
+        return redirect("/")
     return render_template("user_dashboard.html", name=session["name"], college=college)
 
 @app.route("/complaint", methods=["GET","POST"])
 def complaint():
+    if "name" not in session:
+        return redirect("/")
+
     if request.method == "POST":
         comp = request.form["complaint"]
 
@@ -114,8 +117,12 @@ def complaint():
 
     return render_template("complaint_form.html", college=college)
 
+# ✅ FIXED ADMIN ROUTE
 @app.route("/admin")
 def admin():
+    if "name" not in session or session.get("role") != "admin":
+        return redirect("/")
+
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT * FROM complaints")
@@ -127,12 +134,19 @@ def admin():
 # 🔴 DELETE FEATURE
 @app.route("/delete/<int:id>")
 def delete(id):
+    if "name" not in session or session.get("role") != "admin":
+        return redirect("/")
+
     conn = get_db()
     cur = conn.cursor()
     cur.execute("DELETE FROM complaints WHERE id=?", (id,))
     conn.commit()
     conn.close()
 
+    return redirect("/admin")
+
+# ✅ RUN FOR RENDER
+app.run(host='0.0.0.0', port=10000)
     return redirect("/admin")
 
 # ✅ RUN FOR RENDER
