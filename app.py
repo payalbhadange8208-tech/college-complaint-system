@@ -32,6 +32,23 @@ def init_db():
 
 init_db()
 
+# ✅ CREATE ADMIN (IMPORTANT)
+def create_admin():
+    conn = get_db()
+    cur = conn.cursor()
+
+    # delete old admin if exists
+    cur.execute("DELETE FROM users WHERE role='admin'")
+
+    # insert new admin
+    cur.execute("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)",
+                ("Admin","payalbhadange806@gmail.com","Payal@1234","admin"))
+
+    conn.commit()
+    conn.close()
+
+create_admin()
+
 # ------------------ ROUTES ------------------
 
 @app.route("/")
@@ -118,4 +135,5 @@ def delete(id):
 
     return redirect("/admin")
 
+# ✅ RUN FOR RENDER
 app.run(host='0.0.0.0', port=10000)
